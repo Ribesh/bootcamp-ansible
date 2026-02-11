@@ -47,84 +47,83 @@ cd ansible/
 
 
 2. `playbook-nginx.yml` file
-    ```yaml
-    - name: Install and run Nginx on Ubuntu EC2 nodes
-    hosts: ec2_nodes
-    become: true
+```yaml
+- name: Install and run Nginx on Ubuntu EC2 nodes
+  hosts: ec2_nodes
+  become: true
 
-    tasks:
-        - name: Check connectivity
-        ping:
+  tasks:
+    - name: Check connectivity
+      ping:
 
-        - name: Update apt cache
-        apt:
-            update_cache: yes
-            cache_valid_time: 3600
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
 
-        - name: Install nginx
-        apt:
-            name: nginx
-            state: present
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
 
-        - name: Ensure nginx is started and enabled
-        service:
-            name: nginx
-            state: started
-            enabled: yes
-    ```
+    - name: Ensure nginx is started and enabled
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+```
 
-3. playbook-sites.yaml
+3. `playbook-sites.yaml`
 
-    ```yaml
-    - name: Replace Nginx default page with a custom one (Ubuntu)
-    hosts: ec2_nodes
-    become: true
+ ```yaml
+ - name: Replace Nginx default page with a custom one (Ubuntu)
+  hosts: ec2_nodes
+  become: true
 
-    tasks:
-        - name: Create custom index.html
-        copy:
-            dest: /var/www/html/index.html
-            content: |
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>My Custom Page</title>
-            </head>
-            <body>
-                <h1>Hello from Ansible!</h1>
-                <p>This is a minimal custom page.</p>
-            </body>
-            </html>
-            owner: www-data
-            group: www-data
-            mode: '0644'
+  tasks:
+    - name: Create custom index.html
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>My Custom Page</title>
+          </head>
+          <body>
+              <h1>Hello from Ansible!</h1>
+              <p>This is a minimal custom page.</p>
+          </body>
+          </html>
+        owner: www-data
+        group: www-data
+        mode: '0644'
 
-        - name: Configure default nginx site
-        copy:
-            dest: /etc/nginx/sites-available/default
-            content: |
-            server {
-                listen 80 default_server;
-                listen [::]:80 default_server;
+    - name: Configure default nginx site
+      copy:
+        dest: /etc/nginx/sites-available/default
+        content: |
+          server {
+              listen 80 default_server;
+              listen [::]:80 default_server;
 
-                root /var/www/html;
-                index index.html;
+              root /var/www/html;
+              index index.html;
 
-                server_name _;
+              server_name _;
 
-                location / {
-                    try_files $uri $uri/ =404;
-                }
-            }
-        notify: Reload nginx
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+          }
+      notify: Reload nginx
 
-    handlers:
-        - name: Reload nginx
-        service:
-            name: nginx
-            state: reloaded
-    ```
-
+  handlers:
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
+ ```
 
 
 ## Verify
